@@ -1,4 +1,4 @@
--- Personal Context Engine — Initial Database Migration
+-- E-Version — Initial Database Migration
 -- Run automatically by Docker when initializing the Postgres container.
 -- All tables use UUIDs as primary keys and include tenant isolation.
 
@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS memories (
     grounding_sources   TEXT[] NOT NULL DEFAULT '{}',
     grounding_fact_ids  UUID[] NOT NULL DEFAULT '{}',
     allowed_use         TEXT[] NOT NULL DEFAULT '{}',
-    disallowed_use      TEXT[] NOT NULL DEFAULT '{}',
+    use_scope           TEXT[] NOT NULL DEFAULT '{}',
     confidence          FLOAT NOT NULL DEFAULT 0.8,
     user_confirmed      BOOLEAN NOT NULL DEFAULT FALSE,
     embedding           vector(1536),

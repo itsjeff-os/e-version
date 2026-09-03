@@ -1,4 +1,4 @@
-"""Personal Context Engine CLI — command-line interface for the PCE."""
+"""E-Version CLI — command-line interface for Personal Context Intelligence."""
 
 from __future__ import annotations
 
@@ -12,6 +12,9 @@ def cmd_ingest(args: argparse.Namespace) -> None:
     """Ingest a local markdown file or directory."""
     from packages.connectors.markdown.connector import MarkdownConnector
     from services.ingestion_engine.app.pipeline import IngestionPipeline
+    from services.knowledge_graph.app.entity_store import EntityStore
+    from services.knowledge_graph.app.relation_store import RelationStore
+    from services.memory_engine.app.episodic_memory import EpisodicMemoryStore
 
     path = Path(args.path)
     if not path.exists():
@@ -22,7 +25,16 @@ def cmd_ingest(args: argparse.Namespace) -> None:
         base_path=str(path) if path.is_dir() else str(path.parent),
         user_id=args.user_id,
     )
-    pipeline = IngestionPipeline()
+
+    entity_store = EntityStore()
+    relation_store = RelationStore()
+    episodic_memory = EpisodicMemoryStore()
+
+    pipeline = IngestionPipeline(
+        entity_store=entity_store,
+        relation_store=relation_store,
+        episodic_memory=episodic_memory,
+    )
     sources = connector.discover() if path.is_dir() else [connector.metadata(str(path))]
 
     total = 0
@@ -36,10 +48,15 @@ def cmd_ingest(args: argparse.Namespace) -> None:
         if result.skipped_duplicate:
             print(f"  Skipped (duplicate): {source_meta.source_id}")
         else:
-            print(f"  Ingested: {source_meta.source_id} — {result.chunk_count} chunks, {result.entity_count} entities, {result.fact_count} facts")
+            print(
+                f"  Ingested: {source_meta.source_id} — "
+                f"{result.chunk_count} chunks, {result.entity_count} entities, "
+                f"{result.fact_count} facts, {result.relation_count} relations"
+            )
         total += 1
 
     print(f"\nProcessed {total} source(s).")
+    print(f"Knowledge graph: {len(entity_store._entities)} entities, episodic memory: {len(episodic_memory._episodes)} episode streams.")
 
 
 def cmd_chat(args: argparse.Namespace) -> None:
@@ -50,7 +67,7 @@ def cmd_chat(args: argparse.Namespace) -> None:
     session = Session(tenant_id=args.tenant_id, user_id=args.user_id)
     orchestrator = ChatOrchestrator()
 
-    print("Personal Context Engine — Chat")
+    print("E-Version — Personal Context Intelligence")
     print("Type 'exit' or Ctrl-C to quit.\n")
 
     try:
@@ -88,7 +105,7 @@ def cmd_chat(args: argparse.Namespace) -> None:
 
 def cmd_status(args: argparse.Namespace) -> None:
     """Print system status."""
-    print("Personal Context Engine — Status")
+    print("E-Version — Status")
     print(f"  Tenant: {args.tenant_id}")
     print(f"  User:   {args.user_id}")
     print("\nService connectivity checks require a running Docker stack.")
@@ -97,8 +114,8 @@ def cmd_status(args: argparse.Namespace) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="pce",
-        description="Personal Context Engine — command-line interface",
+        prog="eversion",
+        description="E-Version — Personal Context Intelligence CLI",
     )
     parser.add_argument("--tenant-id", default="local", help="Tenant ID (default: local)")
     parser.add_argument("--user-id", default="local", help="User ID (default: local)")

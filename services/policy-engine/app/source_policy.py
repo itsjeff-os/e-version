@@ -7,25 +7,24 @@ from typing import Any
 
 class SourcePolicyEngine:
     """
-    Controls which sources may be queried for a given user/tenant.
+    Scopes which sources are eligible for a given user/tenant.
 
-    Permissions flow all the way from source connectors through retrieval
-    to the final answer — the assistant should never retrieve content
-    the active context is not allowed to use.
+    Permissions flow from source connectors through retrieval to the final
+    answer — each layer respects the active context's scope.
     """
 
     def __init__(
         self,
         allowed_source_types: list[str] | None = None,
-        denied_source_ids: set[str] | None = None,
+        excluded_source_ids: set[str] | None = None,
     ) -> None:
         self._allowed_types = set(allowed_source_types or [])
-        self._denied_ids = denied_source_ids or set()
+        self._excluded_ids = excluded_source_ids or set()
 
     def can_query_source(self, source: dict[str, Any], tenant_id: str, user_id: str) -> bool:
         """Return True if this source may be queried."""
         source_id = source.get("id", source.get("source_id", ""))
-        if source_id in self._denied_ids:
+        if source_id in self._excluded_ids:
             return False
         source_type = source.get("source_type", "")
         if self._allowed_types and source_type not in self._allowed_types:

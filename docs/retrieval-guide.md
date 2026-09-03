@@ -1,26 +1,25 @@
-# Retrieval Policy
+# Retrieval Guide
 
-## Core Principle
+## How Retrieval Works
 
-Every query executes a **retrieval plan** — not a direct vector search.
+Every query starts with a **retrieval plan** — the system decides what it needs, where to look, and how to rank what it finds before searching.
 
-The retrieval planner decides:
-- What do I need to know before answering?
-- Where should I look?
-- Which sources are authoritative?
+The retrieval planner considers:
+- What context does this question need?
+- Which sources are most relevant?
 - How fresh does the context need to be?
-- What would make this answer unsafe or unreliable?
+- What retrieval modes will produce the best answer?
 
 ---
 
 ## Retrieval Modes
 
-| Mode | Use Case |
-|------|----------|
+| Mode | What It Does |
+|------|-------------|
 | `semantic` | General question answering, summarization |
 | `lexical` | Exact matches, config values, device names, file paths |
 | `fact_lookup` | Structured fact retrieval from the fact store |
-| `graph_traversal` | Entity-linked context expansion |
+| `graph_traversal` | Entity-linked context expansion across the knowledge graph |
 | `temporal` | Time-sensitive queries, recent events |
 | `procedural` | How-to questions, setup procedures |
 | `preference` | User preference retrieval |
@@ -68,20 +67,20 @@ final_score =
   session_relevance * 0.05
 ```
 
-**Note:** For technical config queries (`risk_level: operational`), exact match and trust weights should be increased. The planner adjusts weights by intent class.
+For technical config queries (`risk_level: operational`), exact match and trust weights are boosted. The planner adjusts weights by intent class.
 
 ---
 
-## Permission Filtering
+## Permission Scoping
 
-Source permissions flow all the way through retrieval. The retrieval engine must:
+Source permissions flow through every layer of retrieval:
 
 1. Resolve the user's permission set from the tenant context
-2. Filter all chunks against their `permissions` list
-3. Filter all facts against source permissions
-4. Never surface content the active context is not permitted to see
+2. Scope all chunks to their `permissions` list
+3. Scope all facts to their source permissions
+4. Only content within the active context's scope reaches the LLM
 
-This is enforced by the **Policy Engine** before any content reaches the LLM.
+This is structural — enforced by the Policy Engine before any content is assembled.
 
 ---
 
@@ -94,41 +93,40 @@ The model receives context in layers. When token budget is constrained:
 3. Current session state
 4. High-trust structured facts (pinned → canonical → machine_verified)
 5. Supporting retrieved chunks (by final_score)
-6. Conflicts / stale warnings (always included if present)
+6. Conflicts / freshness notes (always included if present)
 7. Raw excerpts — only if budget remains
 
-Never waste context on large raw documents when structured facts are available.
+Structured facts are preferred over large raw documents when available.
 
 ---
 
-## Conflict Handling
+## Transparent Conflicts
 
-Conflicts are **first-class objects** — not errors.
+Conflicts are **first-class objects** — when sources disagree, both sides surface.
 
 When the retrieval engine detects conflicting claims:
 1. Surface both claims with their sources and trust levels
 2. Apply the default resolution strategy (prefer machine_verified + newer)
-3. Flag conflicts that require user review
-4. Always show the conflict in the answer, do not silently pick one
+3. Flag conflicts that would benefit from user review
+4. Always show the conflict in the answer — transparency over silent resolution
 
-Example surfaced conflict:
+Example:
 ```
-⚠ Conflict on vlan_20.subnet:
+Heads up — conflicting values for vlan_20.subnet:
   - 192.168.20.0/24 (source: vlans.md, trust: canonical)
   - 10.20.0.0/24 (source: router_export.json, trust: machine_verified)
-  Resolution: prefer router_export.json (machine_verified, newer)
-  Requires user review: true
+  Suggested resolution: prefer router_export.json (machine_verified, newer)
 ```
 
 ---
 
-## Staleness
+## Freshness
 
 Freshness classification:
 - `current` — updated within 7 days
-- `recent` — updated within 30 days  
+- `recent` — updated within 30 days
 - `aging` — updated within 90 days
 - `stale` — updated within 365 days
 - `expired` — not updated in over a year
 
-For `risk_level: operational` queries, stale and expired facts should be surfaced with explicit warnings and not used as primary answers.
+For `risk_level: operational` queries, stale and expired facts are surfaced with freshness notes and not used as primary answers.

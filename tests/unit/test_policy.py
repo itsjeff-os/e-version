@@ -90,7 +90,7 @@ class TestSourcePolicyEngine:
     def setup_method(self):
         self.engine = SourcePolicyEngine(
             allowed_source_types=["markdown", "router_export"],
-            denied_source_ids={"blocked-source-id"},
+            excluded_source_ids={"blocked-source-id"},
         )
         self.tenant = "tenant1"
         self.user = "user1"
@@ -99,11 +99,11 @@ class TestSourcePolicyEngine:
         source = {"source_type": "markdown", "permissions": []}
         assert self.engine.can_query_source(source, self.tenant, self.user)
 
-    def test_denied_source_type_blocked(self):
+    def test_excluded_source_type(self):
         source = {"source_type": "slack", "permissions": []}
         assert not self.engine.can_query_source(source, self.tenant, self.user)
 
-    def test_denied_source_id_blocked(self):
+    def test_excluded_source_id(self):
         source = {"id": "blocked-source-id", "source_type": "markdown", "permissions": []}
         assert not self.engine.can_query_source(source, self.tenant, self.user)
 

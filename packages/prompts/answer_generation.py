@@ -20,7 +20,7 @@ ANSWER_GENERATION_TEMPLATE = """\
 ## Relevant Document Excerpts
 {chunks_section}
 
-## Conflicts and Stale Warnings
+## Heads Up — Conflicts and Freshness
 {conflicts_section}
 
 ## Session State
@@ -106,7 +106,7 @@ def _format_conflicts(conflicts: list[dict]) -> str:
         field = conf.get("field", "?")
         claims = conf.get("claims", [])
         resolution = conf.get("resolution", "unresolved")
-        lines.append(f"⚠ Conflict on {entity}.{field}:")
+        lines.append(f"Heads up — conflicting values for {entity}.{field}:")
         for claim in claims:
             lines.append(f"  - {claim.get('value')} (source: {claim.get('source')}, trust: {claim.get('trust')})")
         lines.append(f"  Resolution: {resolution}")

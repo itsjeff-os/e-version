@@ -1,4 +1,4 @@
-"""Access Policy Engine — controls which facts and chunks may be retrieved."""
+"""Access Policy Engine — scopes which facts and chunks flow into retrieval."""
 
 from __future__ import annotations
 
@@ -9,46 +9,44 @@ from packages.ranking.trust import TrustScorer
 
 logger = logging.getLogger(__name__)
 
-# Trust levels that are always permitted for retrieval
 DEFAULT_ALLOWED_TRUST_LEVELS = {
     "pinned", "canonical", "machine_verified", "user_confirmed", "source_backed", "derived"
 }
-# Trust levels that are denied by default (too low quality)
-DEFAULT_DENIED_TRUST_LEVELS = {"deprecated"}
+DEFAULT_EXCLUDED_TRUST_LEVELS = {"deprecated"}
 
 
 class AccessPolicyEngine:
     """
-    Enforces access policies on retrieved content.
+    Scopes retrieved content to what's appropriate for the current context.
 
-    Checks:
-    - Can this fact be used? (trust level, staleness, permissions)
-    - Can this chunk be shown? (permission list, tenant isolation)
-    - Is this fact from a denied source type?
+    Evaluates:
+    - Trust level and freshness of facts
+    - Chunk permissions and tenant scope
+    - Source type eligibility
     """
 
     def __init__(
         self,
         allowed_trust_levels: set[str] | None = None,
-        denied_trust_levels: set[str] | None = None,
-        denied_source_types: set[str] | None = None,
+        excluded_trust_levels: set[str] | None = None,
+        excluded_source_types: set[str] | None = None,
     ) -> None:
         self._allowed_trust = allowed_trust_levels or DEFAULT_ALLOWED_TRUST_LEVELS
-        self._denied_trust = denied_trust_levels or DEFAULT_DENIED_TRUST_LEVELS
-        self._denied_source_types = denied_source_types or set()
+        self._excluded_trust = excluded_trust_levels or DEFAULT_EXCLUDED_TRUST_LEVELS
+        self._excluded_source_types = excluded_source_types or set()
         self._scorer = TrustScorer()
 
     def can_use_fact(self, fact: dict[str, Any], tenant_id: str, user_id: str) -> bool:
         """Return True if the fact may be used in a response."""
         trust = fact.get("trust_level", "inferred")
-        if trust in self._denied_trust:
-            logger.debug("Fact denied by trust level: %s", trust)
+        if trust in self._excluded_trust:
+            logger.debug("Fact excluded by trust level: %s", trust)
             return False
-        if fact.get("source_type") in self._denied_source_types:
-            logger.debug("Fact denied by source type: %s", fact.get("source_type"))
+        if fact.get("source_type") in self._excluded_source_types:
+            logger.debug("Fact outside source scope: %s", fact.get("source_type"))
             return False
         if fact.get("tenant_id") and fact["tenant_id"] != tenant_id:
-            logger.debug("Fact denied by tenant isolation.")
+            logger.debug("Fact outside tenant scope.")
             return False
         return True
 

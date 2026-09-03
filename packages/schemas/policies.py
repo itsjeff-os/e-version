@@ -1,4 +1,4 @@
-"""Policy schemas — access control, memory gating, source permissions, sensitivity."""
+"""Policy schemas — access scope, memory promotion, source permissions, sensitivity."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ class PolicyType(str, Enum):
 
 class PolicyDecision(str, Enum):
     ALLOW = "allow"
-    DENY = "deny"
+    HOLD = "hold"
     REQUIRE_CONFIRMATION = "require_confirmation"
     REDACT = "redact"
     FLAG = "flag"
@@ -70,7 +70,7 @@ class AccessPolicy(Policy):
 
     policy_type: PolicyType = PolicyType.ACCESS
     allowed_trust_levels: list[str] = Field(default_factory=list)
-    denied_source_types: list[str] = Field(default_factory=list)
+    excluded_source_types: list[str] = Field(default_factory=list)
 
 
 class MemoryPolicy(Policy):
@@ -88,7 +88,7 @@ class SourcePolicy(Policy):
 
     policy_type: PolicyType = PolicyType.SOURCE
     allowed_source_types: list[str] = Field(default_factory=list)
-    denied_source_ids: list[str] = Field(default_factory=list)
+    excluded_source_ids: list[str] = Field(default_factory=list)
 
 
 class SensitivityPolicy(Policy):

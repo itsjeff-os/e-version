@@ -1,50 +1,49 @@
-# Personal Context Engine — E-Version
+# E-Version — Personal Context Intelligence
 
-A deployable **Context Intelligence Platform** for reasoning over personal context with trust, source grounding, and policy awareness.
+An AI-native platform that gives language models deep, structured access to your personal world — your documents, networks, projects, relationships, and environment — so they can reason with full context, not just chunks.
 
-## Core Thesis
+## What E-Version Does
 
-> The model should never be the database.
+> Your AI finally knows your world.
 
-| Layer | Role |
-|-------|------|
-| **Sources** | Define truth |
-| **Ingestion** | Normalize truth |
-| **Knowledge systems** | Structure truth |
-| **Retrieval** | Select truth |
-| **Memory** | Route truth |
-| **Session state** | Preserve intent |
-| **LLM** | Reason over truth |
+| Layer | What it brings |
+|-------|---------------|
+| **Sources** | Your documents, configs, exports, notes — ingested and kept fresh |
+| **Knowledge Graph** | Entities, relationships, and structured facts — your world as a connected model |
+| **Memory** | Typed, layered memory — profile, preferences, environment, episodic, session |
+| **Retrieval** | Intelligent multi-modal search — semantic, lexical, graph traversal, fact lookup |
+| **Trust & Freshness** | Every fact scored by provenance and age — the AI knows what to rely on |
+| **LLM** | Reasons over all of it — grounded, cited, and transparent |
 
 ---
 
-## What makes this different from basic RAG
+## Beyond Basic RAG
 
-Basic RAG retrieves **chunks**.  
-E-Version retrieves **context** with policy, trust, freshness, structure, and memory boundaries.
+Basic RAG retrieves **chunks** and hopes for the best.
+E-Version retrieves **context** — structured, scored, and connected.
 
-The assistant knows:
-- What to retrieve (retrieval planner)
-- What to trust (trust scoring)
-- What not to assume (policy gates)
-- When context is stale (freshness scoring)
-- How the conversation connects to your world (knowledge graph)
-- Why it answered (retrieval trace in admin console)
+The assistant can:
+- **Connect the dots** across your knowledge graph — entities, relationships, causality
+- **Retrieve intelligently** — a retrieval planner decides what modes to use before searching
+- **Score what it finds** — trust levels, freshness, and source provenance flow through every answer
+- **Show its work** — every answer is cited, every retrieval is traceable
+- **Remember meaningfully** — typed memory that knows when to persist and when to let go
+- **Surface conflicts** — when sources disagree, you see both sides
 
 ---
 
 ## Architecture
 
 ```
-personal-context-engine/
+e-version/
   services/
     api-gateway/          # Auth, rate limits, routing
     chat-orchestrator/    # Runtime intelligence loop
     retrieval-engine/     # Hybrid search + graph expansion
     ingestion-engine/     # Source → structured knowledge
-    memory-engine/        # Typed, policy-gated memory
-    knowledge-graph/      # Typed world model
-    policy-engine/        # Access, memory, source, sensitivity policies
+    memory-engine/        # Typed, layered memory
+    knowledge-graph/      # Entity and relationship model
+    policy-engine/        # Access, memory, source, sensitivity
     eval-engine/          # Continuous quality evaluation
   packages/
     schemas/              # Core data models (Pydantic)
@@ -74,8 +73,8 @@ personal-context-engine/
     evals/                # Retrieval quality evals
   docs/
     architecture.md
-    memory-policy.md
-    retrieval-policy.md
+    memory-guide.md
+    retrieval-guide.md
     security-model.md
 ```
 
@@ -118,11 +117,11 @@ python -m pytest tests/unit/ -q
 
 ---
 
-## Key Design Decisions
+## How It Works
 
-### Retrieval Plan — Not Just Vector Search
+### Intelligent Retrieval Planning
 
-Before searching, the system generates a typed retrieval plan:
+Before searching, the system generates a typed retrieval plan that decides *how* to find what's needed:
 
 ```json
 {
@@ -136,39 +135,41 @@ Before searching, the system generates a typed retrieval plan:
 
 ### Trust-Scored Facts
 
-Every fact carries a trust level:
+Every fact carries provenance — the system knows how much to rely on each piece of information:
 
 ```python
-TrustLevel.PINNED           # 1.00 — immutable
-TrustLevel.CANONICAL        # 0.95 — authoritative
+TrustLevel.PINNED           # 1.00 — user-pinned, immutable
+TrustLevel.CANONICAL        # 0.95 — authoritative source
 TrustLevel.MACHINE_VERIFIED # 0.90 — machine-parsed export
 TrustLevel.USER_CONFIRMED   # 0.85 — confirmed by user
-TrustLevel.SOURCE_BACKED    # 0.75 — from a source
+TrustLevel.SOURCE_BACKED    # 0.75 — from an ingested source
 TrustLevel.INFERRED         # 0.45 — LLM inference
 TrustLevel.STALE            # 0.25 — outdated
 ```
 
 ### Typed Memory
 
-Memory is not one bucket:
+Memory is layered by purpose, each with its own lifecycle:
 
 ```python
-ProfileMemory      # Durable, user-visible, always requires confirmation
-PreferenceMemory   # Durable, guides answer style
-EnvironmentMemory  # Source-grounded, routes retrieval — never replaces it
-ProceduralMemory   # Versioned, source-backed how-to knowledge
-SessionMemory      # Short-lived, automatic
-WorkingMemory      # Ephemeral per reasoning cycle
+ProfileMemory      # Durable — who you are, confirmed by you
+PreferenceMemory   # Durable — how you like things
+EnvironmentMemory  # Durable — your infrastructure, grounded in sources
+EpisodicMemory     # Durable — what happened, when, and what it meant
+ProceduralMemory   # Versioned — how-to knowledge from your docs
+SessionMemory      # Ephemeral — current conversation context
+WorkingMemory      # Ephemeral — single reasoning cycle
 ```
 
-### Conflicts Are First-Class
+### Transparent Conflicts
+
+When sources disagree, the system surfaces both sides:
 
 ```
-⚠ Conflict on vlan_20.subnet:
+Heads up — conflicting values for vlan_20.subnet:
   - 192.168.20.0/24 (source: vlans.md, trust: canonical)
   - 10.20.0.0/24 (source: router_export.json, trust: machine_verified)
-  Resolution: prefer router_export.json (machine_verified, newer)
-  Requires user review: true
+  Suggested resolution: prefer router_export.json (machine_verified, newer)
 ```
 
 ---
@@ -176,6 +177,6 @@ WorkingMemory      # Ephemeral per reasoning cycle
 ## Docs
 
 - [Architecture](docs/architecture.md)
-- [Memory Policy](docs/memory-policy.md)
-- [Retrieval Policy](docs/retrieval-policy.md)
+- [Memory Guide](docs/memory-guide.md)
+- [Retrieval Guide](docs/retrieval-guide.md)
 - [Security Model](docs/security-model.md)

@@ -9,16 +9,14 @@ class EnvironmentMemoryStore:
     """
     Stores and retrieves environment memories.
 
-    Environment memories are:
-    - Grounded in sources (not freely inferred)
-    - Used to route retrieval, not to answer directly
-    - Not authoritative for exact config values — retrieval sources are
+    Environment memories are source-grounded infrastructure facts that
+    enrich retrieval — they point the system toward the right sources
+    and provide structural context for reasoning.
 
     Example:
       subject: home_network
       summary: User maintains VLAN-based home network. Source of truth: infra/topology.md
-      allowed_use: [routing, retrieval_hint]
-      disallowed_use: [exact_config_answering]
+      use_scope: [routing, retrieval_hint]
     """
 
     def __init__(self) -> None:

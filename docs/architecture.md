@@ -1,24 +1,24 @@
-# Architecture — Personal Context Engine (E-Version)
+# Architecture — E-Version
 
 ## Core Thesis
 
-> The model should never be the database.
+> Your AI finally knows your world.
 
-Instead:
-- **Sources** define truth.
-- **Ingestion** normalizes truth.
-- **Knowledge systems** structure truth.
-- **Retrieval** selects truth.
-- **Memory** routes truth.
-- **Session state** preserves intent.
-- **The LLM** reasons over truth.
+The architecture is built around one idea: give the LLM deep, structured access to everything in your personal context — documents, networks, projects, relationships, environment — so it can reason with full understanding, not just fragments.
+
+- **Sources** capture your world.
+- **Ingestion** structures it.
+- **Knowledge Graph** connects it.
+- **Memory** enriches it over time.
+- **Retrieval** finds what matters.
+- **The LLM** reasons over all of it — grounded, cited, transparent.
 
 ---
 
 ## Top-Level Structure
 
 ```
-personal-context-engine/
+e-version/
   services/          # Backend microservices
   packages/          # Shared libraries
   workers/           # Async background workers
@@ -26,7 +26,7 @@ personal-context-engine/
   apps/              # Web console, CLI, desktop agent, browser extension
   context-fixtures/  # Sample context data for development
   tests/             # Unit, integration, and eval tests
-  docs/              # Architecture and policy documentation
+  docs/              # Architecture and guides
 ```
 
 ---
@@ -36,7 +36,7 @@ personal-context-engine/
 ### API Gateway
 **Responsibilities:** Auth, rate limits, tenant isolation, request routing, audit logging, API keys, webhooks.
 
-No intelligence happens here. It is the front door.
+The front door — routes requests and ensures each user's context stays private.
 
 ### Chat Orchestrator
 **The brain of the runtime flow.**
@@ -61,21 +61,21 @@ Performs hybrid retrieval:
 - Knowledge graph expansion
 - Entity-aware retrieval
 - Fact lookup
-- Metadata and permission filtering
+- Metadata and permission scoping
 - Trust and freshness ranking
 - Conflict detection and surfacing
 - Context packing with token budget management
 - Citation binding
 
 ### Ingestion Engine
-Turns messy sources into usable intelligence.
+Turns raw sources into structured, connected knowledge.
 
-Pipeline: `Fetch → Normalize → Dedupe → Chunk → Extract Entities → Extract Facts → Embed → Index → Score Trust → Detect Conflicts → Store Provenance`
+Pipeline: `Fetch → Normalize → Dedupe → Chunk → Extract Entities → Extract Facts → Build Graph → Embed → Index → Record Episode`
 
 Supported sources: Google Drive, Notion, GitHub, Slack, email, calendar, router configs, network exports, markdown, PDFs, screenshots, CSV/JSON/YAML, manual notes, browser bookmarks, terminal logs.
 
 ### Memory Engine
-Not one memory bucket — typed memory classes with different rules:
+Typed memory classes, each with its own lifecycle and purpose:
 
 | Type | Durability | Grounding | Confirmation |
 |------|-----------|-----------|--------------|
@@ -85,30 +85,31 @@ Not one memory bucket — typed memory classes with different rules:
 | Project | Durable | Soft | Optional |
 | Procedural | Versioned | Required | Always |
 | Relationship | Durable | Soft | Optional |
+| Episodic | Durable | Automatic | Never |
 | Session | Short-lived | None | Never |
 | Working | Ephemeral | None | Never |
 
-**Key principle: Memory routes retrieval. Memory does not replace retrieval.**
+Memory enriches retrieval — it helps the system find the right context faster and understand what matters.
 
 ### Knowledge Graph Service
-Stores a typed world model.
+Stores a typed world model — entities, relationships, and the connections between them.
 
 **Entity types:** Person, Device, Network, VLAN, Subnet, Service, Project, Document, Task, Location, CredentialReference, Procedure, Issue, Decision, Preference, Source, Fact, Rule, Event
 
 **Relation types:** device_on_network, service_hosted_on, vlan_routes_to, document_mentions_entity, person_owns_device, project_depends_on, fact_derived_from_source, memory_grounded_by_fact, issue_affects_service, procedure_applies_to_device
 
 ### Policy Engine
-Controls what may be used, stored, updated, or shown.
+Structural safeguards that keep context appropriate and secure.
 
-- **Access Policy:** Which facts and chunks may be retrieved
-- **Memory Policy:** When memories may be created or updated
-- **Source Policy:** Which sources may be queried
-- **Sensitivity Policy:** Redaction and flagging of sensitive data
+- **Access Scope:** Which facts and chunks are eligible for retrieval
+- **Memory Promotion:** When memories are ready for durable storage
+- **Source Scope:** Which sources are active for queries
+- **Sensitivity:** Structural protection for credentials and secrets
 
 ### Eval Engine
-Continuous quality checks.
+Continuous quality measurement.
 
-Metrics tracked: retrieval precision/recall, citation correctness, stale fact usage, conflict handling, answer groundedness, session coherence, memory promotion correctness, hallucination rate, latency, cost.
+Metrics tracked: retrieval precision/recall, citation correctness, stale fact usage, conflict handling, answer groundedness, session coherence, memory promotion quality, hallucination rate, latency, cost.
 
 ---
 
@@ -153,7 +154,7 @@ User message
   → Hybrid search (semantic + lexical)
   → Knowledge graph expansion
   → Fact lookup
-  → Conflict / staleness checks
+  → Conflict / freshness checks
   → Reranking
   → Context assembly (layered)
   → LLM reasoning
@@ -175,7 +176,7 @@ User message
 | user_confirmed | 0.85 | Explicitly confirmed by user |
 | source_backed | 0.75 | Derived from a source |
 | derived | 0.60 | Logically derived |
-| inferred | 0.45 | LLM inferred — low confidence |
+| inferred | 0.45 | LLM inferred — lower confidence |
 | stale | 0.25 | Outdated fact |
 | conflicted | 0.15 | Conflicting claims exist |
 | deprecated | 0.05 | Retired fact |

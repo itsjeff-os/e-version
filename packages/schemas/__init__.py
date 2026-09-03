@@ -1,6 +1,6 @@
 """
-Personal Context Engine — E-Version
-Core schemas package: canonical data models for all PCE entities.
+E-Version — Personal Context Intelligence
+Core schemas package: canonical data models for all entities.
 """
 
 from .documents import Document, DocumentStatus

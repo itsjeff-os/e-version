@@ -20,7 +20,7 @@ class DocumentStatus(str, Enum):
 
 
 class Document(BaseModel):
-    """A source document ingested into the Personal Context Engine."""
+    """A source document ingested into E-Version."""
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str

@@ -14,16 +14,14 @@ class MemoryRouter:
     """
     Routes memory requests to the appropriate typed store.
 
-    Key principle:
-      Memory can ROUTE retrieval.
-      Memory should NOT REPLACE retrieval.
-
-    Memory types and their roles:
+    Memory enriches retrieval — each type contributes context that makes
+    search smarter and answers richer:
       - profile: durable user facts → provide user context
       - preference: user preferences → guide retrieval and answer format
       - environment: infrastructure facts → hint at retrieval targets
       - project: project goals and decisions → scope retrieval
       - procedural: how-to knowledge → pulled during procedure_lookup
+      - episodic: event history → pattern recognition, narrative context
       - session: current session context → injected into every call
       - working: ephemeral per-turn context → not persisted
     """
@@ -35,6 +33,7 @@ class MemoryRouter:
         environment_store=None,
         project_store=None,
         procedural_store=None,
+        episodic_store=None,
         session_store=None,
     ) -> None:
         self._stores = {
@@ -43,6 +42,7 @@ class MemoryRouter:
             MemoryType.ENVIRONMENT: environment_store,
             MemoryType.PROJECT: project_store,
             MemoryType.PROCEDURAL: procedural_store,
+            MemoryType.EPISODIC: episodic_store,
             MemoryType.SESSION: session_store,
         }
 
@@ -65,6 +65,7 @@ class MemoryRouter:
             "profile": [],
             "environment_hints": [],
             "project_context": [],
+            "recent_episodes": [],
         }
 
         # Session memories are always loaded
@@ -94,6 +95,13 @@ class MemoryRouter:
                 context["environment_hints"] = self._stores[MemoryType.ENVIRONMENT].get_for_user(user_id, tenant_id)
             except Exception as exc:
                 logger.warning("Environment memory load failed: %s", exc)
+
+        # Recent episodes for narrative context
+        if self._stores.get(MemoryType.EPISODIC):
+            try:
+                context["recent_episodes"] = self._stores[MemoryType.EPISODIC].get_recent(user_id, tenant_id, limit=5)
+            except Exception as exc:
+                logger.warning("Episodic memory load failed: %s", exc)
 
         return context
 

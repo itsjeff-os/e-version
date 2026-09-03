@@ -21,16 +21,14 @@ class PromotionDecision:
 
 class MemoryPromotionPolicy:
     """
-    Evaluates whether a candidate memory should be promoted to durable storage.
+    Evaluates whether a candidate memory is ready for promotion to durable storage.
 
-    Promotion rules (in order):
-    1. Candidate must have grounding_sources (not freely inferred).
-    2. Candidate confidence must meet the threshold for its memory_type.
-    3. Environment and procedural memories always require source grounding.
-    4. Profile memories require user confirmation if confidence < 0.90.
-    5. Session memories are not promoted unless explicitly flagged.
-
-    The model should never silently store everything it infers.
+    Promotion criteria (in order):
+    1. Grounded memories (with source backing) promote with higher confidence.
+    2. Confidence must meet the threshold for its memory_type.
+    3. Environment and procedural memories are strongest when source-grounded.
+    4. Profile memories invite user confirmation when confidence < 0.90.
+    5. Session memories stay ephemeral unless explicitly promoted.
     """
 
     CONFIDENCE_THRESHOLDS: dict[str, float] = {
@@ -55,29 +53,26 @@ class MemoryPromotionPolicy:
         confidence = float(candidate.get("confidence", 0.0))
         grounding_sources = candidate.get("grounding_sources", [])
 
-        # Session memories are never auto-promoted
         if memory_type == "session":
             return PromotionDecision(
                 should_promote=False,
                 memory_type=memory_type,
                 confidence=confidence,
                 requires_confirmation=False,
-                reason="Session memories are not promoted to durable storage.",
+                reason="Session memories stay ephemeral by design.",
                 candidate=candidate,
             )
 
-        # Check source grounding requirement
         if memory_type in self.REQUIRES_GROUNDING and not grounding_sources:
             return PromotionDecision(
                 should_promote=False,
                 memory_type=memory_type,
                 confidence=confidence,
                 requires_confirmation=False,
-                reason=f"{memory_type} memory requires source grounding but none was provided.",
+                reason=f"{memory_type} memory needs source grounding to promote — add a source reference.",
                 candidate=candidate,
             )
 
-        # Check confidence threshold
         threshold = self.CONFIDENCE_THRESHOLDS.get(memory_type, 0.80)
         if confidence < threshold:
             return PromotionDecision(
@@ -85,7 +80,7 @@ class MemoryPromotionPolicy:
                 memory_type=memory_type,
                 confidence=confidence,
                 requires_confirmation=False,
-                reason=f"Confidence {confidence:.2f} is below threshold {threshold:.2f} for {memory_type}.",
+                reason=f"Confidence {confidence:.2f} hasn't reached the {threshold:.2f} threshold for {memory_type} yet.",
                 candidate=candidate,
             )
 

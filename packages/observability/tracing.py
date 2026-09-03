@@ -1,4 +1,4 @@
-"""Distributed tracing support for the Personal Context Engine."""
+"""Distributed tracing support for the E-Version."""
 
 from __future__ import annotations
 

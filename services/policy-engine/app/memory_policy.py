@@ -1,4 +1,4 @@
-"""Memory Policy Engine — controls when memories may be created or updated."""
+"""Memory Policy Engine — guides when memories are promoted to durable storage."""
 
 from __future__ import annotations
 
@@ -7,12 +7,12 @@ from typing import Any
 
 class MemoryPolicyEngine:
     """
-    Wraps the MemoryPromotionPolicy with additional policy gates.
+    Layers promotion criteria on top of the base MemoryPromotionPolicy.
 
-    Additional checks:
-    - Is the memory type allowed for this tenant?
-    - Does this memory require user confirmation?
-    - Is there a conflict that blocks auto-promotion?
+    Evaluates:
+    - Whether the memory type is enabled for this tenant
+    - Whether user confirmation is appropriate
+    - Whether grounding is sufficient for promotion
     """
 
     def __init__(
@@ -35,7 +35,7 @@ class MemoryPolicyEngine:
                 memory_type=memory_type,
                 confidence=0.0,
                 requires_confirmation=False,
-                reason=f"Memory type '{memory_type}' is not allowed by policy.",
+                reason=f"Memory type '{memory_type}' is not enabled for this tenant.",
                 candidate=candidate,
             )
         return self._promotion_policy.evaluate(candidate)

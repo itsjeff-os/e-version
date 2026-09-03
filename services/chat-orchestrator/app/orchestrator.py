@@ -1,5 +1,5 @@
 """
-Chat Orchestrator — the main runtime loop of the Personal Context Engine.
+Chat Orchestrator — the main runtime loop of the E-Version.
 
 Conversation flow:
   1. Receive user message

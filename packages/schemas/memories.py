@@ -42,7 +42,7 @@ class Memory(BaseModel):
     grounding_sources: list[str] = Field(default_factory=list)
     grounding_fact_ids: list[str] = Field(default_factory=list)
     allowed_use: list[str] = Field(default_factory=list)
-    disallowed_use: list[str] = Field(default_factory=list)
+    use_scope: list[str] = Field(default_factory=list)
     confidence: float = Field(ge=0.0, le=1.0, default=0.8)
     user_confirmed: bool = False
     embedding: list[float] | None = None
@@ -104,6 +104,16 @@ class SessionMemory(Memory):
 
     memory_type: MemoryType = MemoryType.SESSION
     session_id: str = ""
+
+
+class EpisodicMemory(Memory):
+    """Records of events, interactions, and outcomes — what happened and what it meant."""
+
+    memory_type: MemoryType = MemoryType.EPISODIC
+    episode_type: str = ""
+    entity_ids: list[str] = Field(default_factory=list)
+    source_uri: str = ""
+    significance: str = "normal"
 
 
 class WorkingMemory(Memory):

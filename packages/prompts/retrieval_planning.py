@@ -6,7 +6,7 @@ import json
 
 
 RETRIEVAL_PLANNING_PROMPT_TEMPLATE = """\
-You are the retrieval planner for the Personal Context Engine.
+You are the retrieval planner for the E-Version.
 
 Given the user's message and session context, generate a structured retrieval plan.
 

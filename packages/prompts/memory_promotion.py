@@ -6,10 +6,10 @@ import json
 
 
 MEMORY_PROMOTION_TEMPLATE = """\
-You are the memory promotion evaluator for the Personal Context Engine.
+You are the memory promotion evaluator for E-Version.
 
-A candidate memory has been detected from the current conversation. \
-Your job is to evaluate whether it should be stored as a durable memory.
+A candidate memory has emerged from the current conversation. \
+Evaluate whether it's ready to become durable — a lasting part of the user's context.
 
 Candidate memory:
 {candidate_json}
@@ -18,16 +18,16 @@ Grounding sources available: {grounding_sources}
 
 Session context summary: {session_context}
 
-Evaluate the candidate against these criteria:
-1. Is this fact clearly grounded in the provided sources (not freely inferred)?
-2. Is this the type of fact that should persist across sessions (not ephemeral)?
-3. Is the confidence level appropriate for the memory type?
-4. Does storing this require user confirmation?
+Evaluate the candidate:
+1. Is this fact grounded in the provided sources?
+2. Is this the kind of knowledge that enriches future sessions?
+3. Is the confidence level strong enough for this memory type?
+4. Would the user benefit from confirming this before it's stored?
 
 Respond with a JSON object:
 {{
   "should_store": <true | false>,
-  "memory_type": "<profile | preference | environment | project | procedural | relationship | session>",
+  "memory_type": "<profile | preference | environment | project | procedural | relationship | episodic | session>",
   "confidence": <0.0 to 1.0>,
   "requires_confirmation": <true | false>,
   "reason": "<brief explanation>"
