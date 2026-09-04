@@ -32,6 +32,25 @@ class EntityType(str, Enum):
     EVENT = "event"
     UNKNOWN = "unknown"
 
+    # Smart home domain
+    AREA = "area"
+    ROOM = "room"
+    ZONE = "zone"
+    FLOOR = "floor"
+    INTEGRATION = "integration"
+    HUB = "hub"
+    SENSOR = "sensor"
+    LIGHT = "light"
+    SWITCH = "switch"
+    COVER = "cover"
+    MEDIA_PLAYER = "media_player"
+    CLIMATE = "climate"
+    AUTOMATION = "automation"
+    SCENE = "scene"
+    BLUEPRINT = "blueprint"
+    LIGHT_GROUP = "light_group"
+    INPUT_HELPER = "input_helper"
+
 
 class RelationType(str, Enum):
     DEVICE_ON_NETWORK = "device_on_network"
@@ -48,6 +67,21 @@ class RelationType(str, Enum):
     MEMBER_OF = "member_of"
     DEPENDS_ON = "depends_on"
     CONFLICTS_WITH = "conflicts_with"
+
+    # Smart home domain
+    DEVICE_IN_AREA = "device_in_area"
+    AREA_ON_FLOOR = "area_on_floor"
+    AREA_ADJACENT_TO = "area_adjacent_to"
+    ZONE_WITHIN_AREA = "zone_within_area"
+    DEVICE_HAS_ENTITY = "device_has_entity"
+    INTEGRATION_PROVIDES_DEVICE = "integration_provides_device"
+    HUB_BRIDGES_DEVICE = "hub_bridges_device"
+    SENSOR_MONITORS_AREA = "sensor_monitors_area"
+    AUTOMATION_CONTROLS_DEVICE = "automation_controls_device"
+    AUTOMATION_TRIGGERED_BY = "automation_triggered_by"
+    SCENE_SETS_DEVICE = "scene_sets_device"
+    LIGHT_GROUP_CONTAINS = "light_group_contains"
+    BLUEPRINT_INSTANTIATES = "blueprint_instantiates"
 
 
 class Entity(BaseModel):
